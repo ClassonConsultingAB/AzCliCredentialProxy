@@ -76,7 +76,7 @@ When developing locally you can get reduce the time to start applications by set
 For example:
 
 ```powershell
-docker run -d --name azure-cli-credential-proxy -p 8080:80 -v ~/.azure:/app/.azure -e DEBUG_ACCESS_TOKEN=true -e CACHE_ACCESS_TOKEN=true azure-cli-credential-proxy:v1
+docker run -d --name azure-cli-credential-proxy -p 8080:8080 -v ~/.azure:/app/.azure --restart=always -e DEBUG_ACCESS_TOKEN=true -e CACHE_ACCESS_TOKEN=true azure-cli-credential-proxy:v1
 ```
 
 > **Warning**

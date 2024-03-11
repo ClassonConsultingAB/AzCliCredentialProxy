@@ -1,8 +1,8 @@
 param(
-    [ValidateSet('NonProd', 'Prod')][string]$Environment = 'NonProd',
     [switch]$SkipPush,
     [string]$Version = $null,
     [string]$RegistryPrefix = 'gchr.io/classonconsultingab',
+    [string]$RepositoryUrl = 'https://github.com/ClassonConsultingAB/AzCliCredentialProxy',
     [string]$GitHubPat = $env:GitHubPat
 )
 
@@ -12,6 +12,7 @@ import-module "$PSScriptRoot/modules/BuildTasks/BuildTasks.psm1" -Force
 
 $root = Resolve-Path "$PSScriptRoot/.."
 $imageName = 'azure-cli-credential-proxy'
+
 if ([string]::IsNullOrEmpty($Version)) {
     $sha = Exec { git rev-parse --short HEAD } -ReturnOutput
     $containerImageVersion = $sha
@@ -29,7 +30,7 @@ $images = [System.Collections.ArrayList]@()
 Task -Title Build -Command {
     $imageWithTag = Get-ImageWithTag $containerImageVersion
     $images.Add($imageWithTag) | Out-Null
-    Exec "docker build --build-arg GITHUB_SOURCE_PASSWORD=$GitHubPat -t $imageWithTag $root"
+    Exec "docker build --build-arg GITHUB_SOURCE_PASSWORD=$GitHubPat -t $imageWithTag --label 'org.opencontainers.image.source=$RepositoryUrl' $root"
     $versionParts = $containerImageVersion.Split('.')
     for ($i = 1; $i -lt $versionParts.Count; $i++) {
         $helperImageWithTag = Get-ImageWithTag (($versionParts | Select-Object -First $i) -join '.')
