@@ -8,10 +8,10 @@ on:
       required: false
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 defaults:
   run:
