@@ -1,8 +1,12 @@
-name: Create and publish a Docker image
+name: Build and publish (GitHub Actions)
 
 on:
   push:
-    branches: ['publish-docker']
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 env:
   REGISTRY: ghcr.io
