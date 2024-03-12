@@ -48,10 +48,10 @@ services:
   my-service:
     ...
     environment:
-      - IDENTITY_ENDPOINT=http://azure-cli-credential-proxy/token
+      - IDENTITY_ENDPOINT=http://azclicredentialproxy/token
       - IMDS_ENDPOINT=dummy_required_value
-  azure-cli-credential-proxy:
-    image: azure-cli-credential-proxy:v1
+  azclicredentialproxy:
+    image: ghcr.io/classonconsultingab/azclicredentialproxy:v1
     volumes:
       - ~/.azure:/app/.azure
     environment:
@@ -76,12 +76,11 @@ When developing locally you can reduce the time to start applications by setting
 For example:
 
 ```powershell
-docker run -d --name ghcr.io/classonconsultingab/azclicredentialproxy:v1 -p 8080:8080 -v ~/.azure:/app/.azure --restart=always -e DEBUG_ACCESS_TOKEN=true -e CACHE_ACCESS_TOKEN=true azure-cli-credential-proxy:v1
+docker run -d --name azclicredentialproxy -p 8080:8080 -v ~/.azure:/app/.azure --restart=always -e DEBUG_ACCESS_TOKEN=true -e CACHE_ACCESS_TOKEN=true ghcr.io/classonconsultingab/azclicredentialproxy:v1
 ```
 
-> **Warning**
->
-> Make sure that when running WSL, that your ~/.azure is not linked to the .azure-folder in Windows. If it is so, you need to remove that link, install AZ CLI directly into WSL and then re-login.
+> [!WARNING]
+Make sure that when running WSL, that your ~/.azure is not linked to the .azure-folder in Windows. If it is so, you need to remove that link, install AZ CLI directly into WSL and then re-login.
 
 ### Increased performance
 
