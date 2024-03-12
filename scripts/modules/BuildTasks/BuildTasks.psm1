@@ -63,14 +63,8 @@ function Fail($Message) {
     exit -1
 }
 
-function Get-SettingsJson($Settings) {
-    $deploySettings = @{}
-    foreach ($p in $Settings.GetEnumerator()) {
-        $deploySettings.Add($p.Name, @{ value = $p.Value })
+function Install-GitVersion {
+    if ($null -eq (Get-Command dotnet-gitversion -ErrorAction SilentlyContinue)) {
+        dotnet tool install --global GitVersion.Tool --version 5.*
     }
-    $json = New-Object psobject -Property $deploySettings | ConvertTo-Json -Compress
-    if ($IsWindows) {
-        return $json -replace '"', '\"'
-    }
-    return $json
 }
