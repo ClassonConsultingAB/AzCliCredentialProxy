@@ -4,6 +4,9 @@ RUN apk add py3-pip && \
     pip install --upgrade pip --break-system-packages && \
     pip install azure-cli --break-system-packages && \
     apk del --purge build
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=true \
+    AZ_INSTALLER=DOCKER \
+    AZURE_CONFIG_DIR=/app/.azure
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS publish
 ARG GITHUB_SOURCE_PASSWORD
@@ -20,8 +23,5 @@ RUN adduser --disabled-password --home /app appuser && chown -R appuser /app
 WORKDIR /app
 USER appuser
 COPY --from=publish /app/publish .
-ENV DOTNET_CLI_TELEMETRY_OPTOUT=true \
-    AZ_INSTALLER=DOCKER \
-    AZURE_CONFIG_DIR=/app/.azure
 EXPOSE 8080
 ENTRYPOINT ["./Api"]

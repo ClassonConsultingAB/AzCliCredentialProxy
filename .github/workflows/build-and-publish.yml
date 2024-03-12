@@ -2,16 +2,21 @@ name: Build and publish
 
 on:
   workflow_dispatch:
-    version:
-      type: string
-      description: Image version formatted as X.Y.Z
-      required: false
+    inputs:
+      version:
+        type: string
+        description: Image version formatted as X.Y.Z
+        required: false
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
+
+permissions:
+  contents: read
+  packages: write
 
 defaults:
   run:
@@ -31,6 +36,6 @@ jobs:
       - name: Build and push
         env:
           VERSION: ${{ github.event.inputs.version }}
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./build.ps1 -GitHubPat $env:GITHUB_TOKEN -Version $env:VERSION -SkipPush
+          ./build.ps1 -GitHubPat $env:GITHUB_TOKEN -Version $env:VERSION

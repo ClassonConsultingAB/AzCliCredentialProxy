@@ -71,12 +71,12 @@ With the Azure CLI credential proxy, the application can run with the same ident
 
 ## Speed up development
 
-When developing locally you can get reduce the time to start applications by setting up an Azure CLI credential provider container that runs in the background and then configuring global environments variables for `IDENTITY_ENDPOINT` and `IMDS_ENDPOINT`.
+When developing locally you can reduce the time to start applications by setting up an Azure CLI credential provider container that runs in the background and then configuring global environment variables for `IDENTITY_ENDPOINT` and `IMDS_ENDPOINT`.
 
 For example:
 
 ```powershell
-docker run -d --name azure-cli-credential-proxy -p 8080:8080 -v ~/.azure:/app/.azure --restart=always -e DEBUG_ACCESS_TOKEN=true -e CACHE_ACCESS_TOKEN=true azure-cli-credential-proxy:v1
+docker run -d --name ghcr.io/classonconsultingab/azclicredentialproxy:v1 -p 8080:8080 -v ~/.azure:/app/.azure --restart=always -e DEBUG_ACCESS_TOKEN=true -e CACHE_ACCESS_TOKEN=true azure-cli-credential-proxy:v1
 ```
 
 > **Warning**
