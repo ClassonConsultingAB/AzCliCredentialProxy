@@ -7,6 +7,12 @@ on:
         type: string
         description: Image version formatted as X.Y.Z
         required: false
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read

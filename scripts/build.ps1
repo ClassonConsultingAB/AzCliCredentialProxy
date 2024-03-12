@@ -1,8 +1,10 @@
 param(
     [switch]$SkipPush,
     [string]$Version = $null,
-    [string]$RegistryPrefix = 'gchr.io/classonconsultingab',
-    [string]$GitHubPat = $env:GitHubPat
+    [string]$GitHubPat = $env:GitHubPat,
+    [string]$Organization = 'ClassonConsultingAB',
+    [string]$Repository = 'AzCliCredentialProxy',
+    [string]$Registry = 'ghcr.io'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -10,7 +12,8 @@ $ErrorActionPreference = 'Stop'
 import-module "$PSScriptRoot/modules/BuildTasks/BuildTasks.psm1" -Force
 
 $root = Resolve-Path "$PSScriptRoot/.."
-$imageName = 'azclicredentialproxy'
+
+$imageName = $Repository.ToLower()
 $sha = Exec { git rev-parse --short HEAD } -ReturnOutput
 
 if ([string]::IsNullOrEmpty($Version)) {
@@ -31,10 +34,10 @@ Task -Title Build -Command {
     $images.Add($imageWithTag) | Out-Null
     $build_args = @(
         "--build-arg GITHUB_SOURCE_PASSWORD=$GitHubPat",
-        '--label org.opencontainers.image.title=AzCliCredentialProxy'
+        "--label org.opencontainers.image.title=$Repository"
         '--label org.opencontainers.image.description='
-        '--label org.opencontainers.image.url=https://github.com/ClassonConsultingAB/AzCliCredentialProxy'
-        '--label org.opencontainers.image.source=https://github.com/ClassonConsultingAB/AzCliCredentialProxy'
+        "--label org.opencontainers.image.url=https://github.com/$Organization/$Repository"
+        "--label org.opencontainers.image.source=https://github.com/$Organization/$Repository"
         "--label org.opencontainers.image.version=$containerImageVersion"
         "--label org.opencontainers.image.created=$([DateTime]::UtcNow.ToString('o'))"
         "--label org.opencontainers.image.revision=$sha"
@@ -51,9 +54,9 @@ Task -Title Build -Command {
 }
 
 Task -Title Push -Skip:$SkipPush -Command {
-    Exec "echo $GitHubPat | docker login ghcr.io -u USERNAME --password-stdin"
+    Exec "echo $GitHubPat | docker login $Registry -u automation --password-stdin"
     foreach ($image in $images) {
-        $gitHubImage = "$RegistryPrefix/$image"
+        $gitHubImage = "$Registry/$($Organization.ToLower())/$image"
         Exec "docker tag $image $gitHubImage"
         Exec "docker push $gitHubImage"
         Exec "docker rmi $gitHubImage"
