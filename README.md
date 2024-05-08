@@ -48,7 +48,7 @@ services:
   my-service:
     ...
     environment:
-      - IDENTITY_ENDPOINT=http://azclicredentialproxy/token
+      - IDENTITY_ENDPOINT=http://azclicredentialproxy:8080/token
       - IMDS_ENDPOINT=dummy_required_value
   azclicredentialproxy:
     image: ghcr.io/classonconsultingab/azclicredentialproxy:v1
