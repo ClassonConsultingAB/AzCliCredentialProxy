@@ -1,13 +1,16 @@
 param(
     [switch]$SkipPush,
     [string]$Version = $null,
-    [string]$GitHubPat = $env:GitHubPat,
     [string]$Organization = 'ClassonConsultingAB',
     [string]$Repository = 'AzCliCredentialProxy',
     [string]$Registry = 'ghcr.io'
 )
 
 $ErrorActionPreference = 'Stop'
+
+if ([string]::IsNullOrEmpty($env:GITHUB_TOKEN)) {
+    throw 'GITHUB_TOKEN environment variable is not set.'
+}
 
 import-module "$PSScriptRoot/modules/BuildTasks/BuildTasks.psm1" -Force
 
@@ -45,7 +48,7 @@ Task -Title Build -Command {
     $imageWithTag = Get-ImageWithTag $containerImageVersion
     $images.Add($imageWithTag) | Out-Null
     $build_args = @(
-        "--build-arg GITHUB_SOURCE_PASSWORD=$GitHubPat",
+        "--secret id=github_token,env=GITHUB_TOKEN",
         "--label org.opencontainers.image.title=$Repository"
         '--label org.opencontainers.image.description='
         "--label org.opencontainers.image.url=https://github.com/$Organization/$Repository"
@@ -68,7 +71,7 @@ Task -Title Build -Command {
 }
 
 Task -Title Push -Skip:$SkipPush -Command {
-    Exec "echo $GitHubPat | docker login $Registry -u automation --password-stdin"
+    Exec "echo $env:GITHUB_TOKEN | docker login $Registry -u automation --password-stdin"
     foreach ($image in $images) {
         $gitHubImage = "$Registry/$($Organization.ToLower())/$image"
         Exec "docker tag $image $gitHubImage"
