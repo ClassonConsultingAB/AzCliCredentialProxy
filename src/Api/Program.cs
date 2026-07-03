@@ -1,4 +1,3 @@
-using System.Globalization;
 using Azure.Core;
 using Azure.Identity;
 using Classon.Identity;
@@ -16,10 +15,11 @@ app.MapGet("/token", async (string resource) =>
         new TokenRequestContext(new[] { resource }), CancellationToken.None);
     if (app.Configuration.GetSection("DEBUG_ACCESS_TOKEN").Get<bool>())
         Console.WriteLine($"Received token for {resource}: {token.Token}");
-    return new Dictionary<string, string>
+    return new Dictionary<string, object>
     {
         ["access_token"] = token.Token,
-        ["expires_on"] = token.ExpiresOn.ToString("O", CultureInfo.InvariantCulture)
+        ["expires_on"] = token.ExpiresOn.ToUnixTimeSeconds(),
+        ["token_type"] = "Bearer"
     };
 });
 

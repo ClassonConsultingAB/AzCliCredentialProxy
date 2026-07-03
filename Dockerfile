@@ -1,18 +1,19 @@
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine AS base
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine AS base
 RUN apk add py3-pip && \
-    apk add --virtual=build gcc musl-dev python3-dev libffi-dev openssl-dev cargo make && \
-    pip install --upgrade pip --break-system-packages && \
-    pip install azure-cli --break-system-packages && \
-    apk del --purge build
+    pip install --break-system-packages azure-cli
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=true \
     AZ_INSTALLER=DOCKER \
     AZURE_CONFIG_DIR=/app/.azure
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS publish
-ARG GITHUB_SOURCE_PASSWORD
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS publish
 ARG GITHUB_SOURCE_URL=https://nuget.pkg.github.com/ClassonConsultingAB/index.json
 WORKDIR /src
-RUN dotnet nuget add source --username docker --password ${GITHUB_SOURCE_PASSWORD} --store-password-in-clear-text --name github ${GITHUB_SOURCE_URL}
+RUN --mount=type=secret,id=github_token \
+    dotnet nuget add source \
+        --username docker \
+        --password "$(cat /run/secrets/github_token)" \
+        --store-password-in-clear-text \
+        --name github ${GITHUB_SOURCE_URL}
 COPY ./src/Api/*.csproj .
 RUN dotnet restore -r linux-musl-x64
 COPY ./src/Api .

@@ -1,8 +1,8 @@
 ## Background
 
-When developing it is common practice to use AZ CLI to get access tokens from Azure Active Directory. With AZ CLI developers can use their user account instead of relying on managing credentials for a separate service principal.
+Using AZ CLI to get access tokens from Azure Active Directory when developing is standard practice. With AZ CLI, developers can use their user accounts instead of relying on managing credentials for a separate service principal.
 
-Running containerized applications with AZ CLI is not practical since AZ CLI is not normally included in the application images targeted for production.
+Running containerized applications with AZ CLI is impractical since AZ CLI is not typically included in the application images targeted for production.
 
 ## Solution
 
@@ -14,7 +14,7 @@ C4Context
         Boundary(wsl, "WSL", "Linux") {
             Boundary(dockerNetwork, "Virtual network", "Docker") {
                 Container(credentialProxy, "Azure CLI credential proxy", "", "DEBUG_ACCESS_TOKEN, CACHE_ACCESS_TOKEN")
-                Container(app, "App", "", "IDENTITY_ENDPOINT, IMDS_ENDPOINT")
+                Container(app, "App", "", "IDENTITY_ENDPOINT, IDENTITY_HEADER")
             }
             SystemDb(azureCliFiles, ".azure", "Persistence for Azure CLI")
             Component(azureCli, "Azure CLI")
@@ -49,7 +49,7 @@ services:
     ...
     environment:
       - IDENTITY_ENDPOINT=http://azclicredentialproxy:8080/token
-      - IMDS_ENDPOINT=dummy_required_value
+      - IDENTITY_HEADER=dummy_required_value
   azclicredentialproxy:
     image: ghcr.io/classonconsultingab/azclicredentialproxy:v1
     volumes:
@@ -61,22 +61,22 @@ services:
 
 Retrieved access tokens will be logged to the console when `DEBUG_ACCESS_TOKEN` is `true`.
 
-The `/app/.azure` volume needs to be from the local `~/.azure` dir created by `az login` on Linux. When AZ CLI is run on Windows it encrypts the content so that it is inaccessible from within the container.
+The `/app/.azure` volume can be mounted from the local `~/.azure` dir created by `az login` on Linux. When AZ CLI is run on Windows, it encrypts the content to be inaccessible from within the container.
 
 ## Benefits
 
 ### Run containers with AZ CLI identity
 
-With the Azure CLI credential proxy, the application can run with the same identity as the developer without the need to install any additional dependencies in the app container image used for production.
+With the Azure CLI credential proxy, the application can run with the same identity as the developer without installing additional dependencies in the app container image used for production.
 
 ## Speed up development
 
-When developing locally you can reduce the time to start applications by setting up an Azure CLI credential provider container that runs in the background and then configuring global environment variables for `IDENTITY_ENDPOINT` and `IMDS_ENDPOINT`.
+When developing locally, you can reduce the time to start applications by setting up an Azure CLI credential provider container running in the background and configuring global environment variables for `IDENTITY_ENDPOINT` and `IDENTITY_HEADER`.
 
 For example:
 
 ```powershell
-docker run -d --name azclicredentialproxy -p 8080:8080 -v ~/.azure:/app/.azure --restart=always -e DEBUG_ACCESS_TOKEN=true -e CACHE_ACCESS_TOKEN=true ghcr.io/classonconsultingab/azclicredentialproxy:v1
+docker run -d --name azclicredentialproxy -p 8080:8080 -v ~/.azure:/app/.azure --restart always -e DEBUG_ACCESS_TOKEN=true -e CACHE_ACCESS_TOKEN=true ghcr.io/classonconsultingab/azclicredentialproxy:v1
 ```
 
 > [!WARNING]
@@ -97,4 +97,4 @@ The `DefaultAzureCredential` contains a chain of credentials that attempts to au
 
 Since `ManagedIdentityCredential` is high up in the list, the app will not waste time trying to authenticate via other methods.
 
-When using the `ManagedIdentityCredential`, we also get the benefit of the built-in access token cache since `Azure.Identity` release 1.8 ([ref](https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/CHANGELOG.md#features-added-5)).
+When using the `ManagedIdentityCredential`, we also benefit from the built-in access token cache since `Azure.Identity` release 1.8 ([ref](https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/CHANGELOG.md#features-added-5)).

@@ -38,4 +38,4 @@ jobs:
           VERSION: ${{ github.event.inputs.version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./build.ps1 -GitHubPat $env:GITHUB_TOKEN -Version $env:VERSION
+          ./build.ps1 -Version $env:VERSION
