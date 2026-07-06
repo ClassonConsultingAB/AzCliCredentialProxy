@@ -8,8 +8,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-if ([string]::IsNullOrEmpty($env:GITHUB_TOKEN)) {
-    throw 'GITHUB_TOKEN environment variable is not set.'
+if ([string]::IsNullOrEmpty($env:GH_TOKEN)) {
+    throw 'GH_TOKEN environment variable is not set.'
 }
 
 import-module "$PSScriptRoot/modules/BuildTasks/BuildTasks.psm1" -Force
@@ -48,7 +48,7 @@ Task -Title Build -Command {
     $imageWithTag = Get-ImageWithTag $containerImageVersion
     $images.Add($imageWithTag) | Out-Null
     $build_args = @(
-        "--secret id=github_token,env=GITHUB_TOKEN",
+        "--secret id=gh_token,env=GH_TOKEN",
         "--label org.opencontainers.image.title=$Repository"
         '--label org.opencontainers.image.description='
         "--label org.opencontainers.image.url=https://github.com/$Organization/$Repository"
@@ -71,7 +71,7 @@ Task -Title Build -Command {
 }
 
 Task -Title Push -Skip:$SkipPush -Command {
-    Exec "echo $env:GITHUB_TOKEN | docker login $Registry -u automation --password-stdin"
+    Exec "echo $env:GH_TOKEN | docker login $Registry -u automation --password-stdin"
     foreach ($image in $images) {
         $gitHubImage = "$Registry/$($Organization.ToLower())/$image"
         Exec "docker tag $image $gitHubImage"
