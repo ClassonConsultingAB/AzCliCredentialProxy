@@ -36,6 +36,6 @@ jobs:
       - name: Build and push
         env:
           VERSION: ${{ github.event.inputs.version }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./build.ps1 -Version $env:VERSION
