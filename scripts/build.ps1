@@ -48,7 +48,7 @@ Task -Title Build -Command {
     $imageWithTag = Get-ImageWithTag $containerImageVersion
     $images.Add($imageWithTag) | Out-Null
     $build_args = @(
-        "--secret id=gh_token,env=GH_TOKEN",
+        "--secret id=github_token,env=GH_TOKEN",
         "--label org.opencontainers.image.title=$Repository"
         '--label org.opencontainers.image.description='
         "--label org.opencontainers.image.url=https://github.com/$Organization/$Repository"
